@@ -38,7 +38,7 @@ class AuthController extends Controller
 
                     return response()->json([
                         "status" => true,
-                        "message" => "Login successful",
+                        "message" => "Sign up successful",
                         "data" => compact(["user"]),
                         "error" => [],
                     ])->withCookie(cookie(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_TTL", 120)));
