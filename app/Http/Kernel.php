@@ -67,6 +67,7 @@ class Kernel extends HttpKernel
 //            EnsureFrontendRequestsAreStateful::class,
             'throttle:api',
             SubstituteBindings::class,
+            AddQueuedCookiesToResponse::class,
         ],
     ];
 

@@ -22,4 +22,6 @@ Route::middleware('api')->group(function () {
     Route::apiResources([
         "user" => UserController::class,
     ]);
+
+    Route::post("me",[AuthController::class,"me"])->name("Auth.me");
 });

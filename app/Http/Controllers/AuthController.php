@@ -9,6 +9,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -27,7 +28,7 @@ class AuthController extends Controller
                 return response()->json([
                     "status" => true,
                     "message" => "Login successful",
-                    "data" => compact(["user","token"]),
+                    "data" => compact(["user"]),
                     "error" => [],
                 ])->withCookie(cookie(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_TTL", 120)));
             } else {
@@ -35,14 +36,16 @@ class AuthController extends Controller
                     $user = self::signUp(new StoreUserRequest($request->all()));
                     $token = JWTAuth::fromUser($user);
                     JWTAuth::setToken($token)->toUser();
+                    $userExists = false;
 
                     return response()->json([
                         "status" => true,
                         "message" => "Sign up successful",
-                        "data" => compact(["user"]),
+                        "data" => compact(["user", "userExists"]),
                         "error" => [],
                     ])->withCookie(cookie(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_TTL", 120)));
                 } catch (Exception $e) {
+                    Log::error($e);
                     return response()->json([
                         "status" => false,
                         "message" => "Error creating user",
@@ -73,6 +76,7 @@ class AuthController extends Controller
             "created_by" => 1,
             "updated_by" => 1,
         ]);
+        Log::debug($request);
 
         return User::query()->create($request->all());
     }
@@ -82,17 +86,19 @@ class AuthController extends Controller
      *
      * @return JsonResponse
      */
-    public function me(): JsonResponse
+    public function me(Request $request): JsonResponse
     {
         try {
-            $user = auth()->user();
+            $user = User::query()->firstWhere("phone_number", "=", $request->phoneNumber);
+            $userExists = !is_null($user);
             return response()->json([
                 "status" => true,
                 "message" => "Login successful",
-                "data" => compact(["user"]),
+                "data" => compact(["user","userExists"]),
                 "error" => [],
             ]);
         } catch (Exception $e) {
+            Log::error($e);
             return response()->json([
                 "status" => false,
                 "message" => "Error getting auth user",
@@ -118,6 +124,7 @@ class AuthController extends Controller
                 "error" => [],
             ]);
         } catch (Exception $e) {
+            Log::error($e);
             return response()->json([
                 "status" => false,
                 "message" => "Error logging out",
@@ -143,6 +150,7 @@ class AuthController extends Controller
                 "error" => [],
             ]);
         } catch (Exception $e) {
+            Log::error($e);
             return response()->json([
                 "status" => false,
                 "message" => "Error refreshing token",
