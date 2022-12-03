@@ -17,11 +17,14 @@ use Illuminate\Support\Facades\Route;
 
 // Free routes
 Route::post("login", [AuthController::class, "login"])->name("login");
-
-Route::middleware('api')->group(function () {
+Route::post("signUp", [AuthController::class, "signUp"])->name("signUp");
+// Protected routes
+Route::middleware(["api","jwt"])->group(function () {
     Route::apiResources([
         "user" => UserController::class,
     ]);
 
     Route::post("me",[AuthController::class,"me"])->name("Auth.me");
+    Route::post("checkToken",[AuthController::class,"checkToken"])->name("Auth.checkToken");
+    Route::post("logout",[AuthController::class,"logout"])->name("Auth.logout");
 });
