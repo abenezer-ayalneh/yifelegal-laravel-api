@@ -10,8 +10,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
-use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\UserNotDefinedException;
 
 class AuthController extends Controller
 {
@@ -22,37 +23,23 @@ class AuthController extends Controller
     {
         try {
             if ($user = User::query()->firstWhere("phone_number", "=", $request->phoneNumber)) {
-                $token = JWTAuth::fromUser($user);
-                JWTAuth::setToken($token)->toUser();
+                $token = auth()->login($user);
+                Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_TTL", "1440"));
+                $userExists = true;
 
                 return response()->json([
                     "status" => true,
                     "message" => "Login successful",
-                    "data" => compact(["user"]),
+                    "data" => compact(["user", "userExists"]),
                     "error" => [],
-                ])->withCookie(cookie(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_TTL", 120)));
+                ]);
             } else {
-                try {
-                    $user = self::signUp(new StoreUserRequest($request->all()));
-                    $token = JWTAuth::fromUser($user);
-                    JWTAuth::setToken($token)->toUser();
-                    $userExists = false;
-
-                    return response()->json([
-                        "status" => true,
-                        "message" => "Sign up successful",
-                        "data" => compact(["user", "userExists"]),
-                        "error" => [],
-                    ])->withCookie(cookie(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_TTL", 120)));
-                } catch (Exception $e) {
-                    Log::error($e);
-                    return response()->json([
-                        "status" => false,
-                        "message" => "Error creating user",
-                        "data" => [],
-                        "error" => $e->getCode(),
-                    ]);
-                }
+                return response()->json([
+                    "status" => false,
+                    "message" => "Phone number not found",
+                    "data" => [],
+                    "error" => [],
+                ]);
             }
         } catch (Exception $e) {
             Log::error($e);
@@ -72,18 +59,38 @@ class AuthController extends Controller
     public function signUp(StoreUserRequest $request): Builder|Model|JsonResponse
     {
         $request->merge([
-            "role_id" => 1,
+            "role_id" => 2,
             "created_by" => 1,
             "updated_by" => 1,
         ]);
-        Log::debug($request);
 
-        return User::query()->create($request->all());
+        $user = User::query()->create($request->all());
+        try {
+            $token = auth()->login($user);
+            Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_TTL", "1440"));
+            $userExists = false;
+
+            return response()->json([
+                "status" => true,
+                "message" => "Sign up successful",
+                "data" => compact(["user", "userExists"]),
+                "error" => [],
+            ]);
+        } catch (Exception $e) {
+            Log::error($e);
+            return response()->json([
+                "status" => false,
+                "message" => "Error creating user",
+                "data" => [],
+                "error" => $e->getCode(),
+            ]);
+        }
     }
 
     /**
      * Get the authenticated User.
      *
+     * @param Request $request
      * @return JsonResponse
      */
     public function me(Request $request): JsonResponse
@@ -93,15 +100,15 @@ class AuthController extends Controller
             $userExists = !is_null($user);
             return response()->json([
                 "status" => true,
-                "message" => "Login successful",
-                "data" => compact(["user","userExists"]),
+                "message" => "Checking user successful",
+                "data" => compact(["user", "userExists"]),
                 "error" => [],
             ]);
         } catch (Exception $e) {
             Log::error($e);
             return response()->json([
                 "status" => false,
-                "message" => "Error getting auth user",
+                "message" => "Error fetching user",
                 "data" => [],
                 "error" => $e->getCode(),
             ]);
@@ -136,17 +143,17 @@ class AuthController extends Controller
 
     /**
      * Refresh a token.
-     *
      * @return JsonResponse
      */
     public function refresh()
     {
         try {
             $token = auth()->refresh();
+            Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_TTL", "1440"));
             return response()->json([
                 "status" => true,
                 'message' => 'Successfully refreshed token',
-                "data" => compact(["token"]),
+                "data" => [],
                 "error" => [],
             ]);
         } catch (Exception $e) {
@@ -154,6 +161,41 @@ class AuthController extends Controller
             return response()->json([
                 "status" => false,
                 "message" => "Error refreshing token",
+                "data" => [],
+                "error" => $e->getCode(),
+            ]);
+        }
+    }
+
+    /**
+     * Check if the token is valid or not
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function checkToken(Request $request): JsonResponse
+    {
+        try {
+            $user = auth()->userOrFail();
+
+            return response()->json([
+                "status" => true,
+                'message' => 'Successfully checked token',
+                "data" => compact("user"),
+                "error" => [],
+            ]);
+        } catch (UserNotDefinedException $e) {
+            Log::error($e);
+            return response()->json([
+                "status" => true,
+                "message" => "User not found",
+                "data" => ["user" => null],
+                "error" => $e->getCode(),
+            ], 403);
+        } catch (Exception $e) {
+            Log::error($e);
+            return response()->json([
+                "status" => false,
+                "message" => "Error checking token",
                 "data" => [],
                 "error" => $e->getCode(),
             ]);
