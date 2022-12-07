@@ -120,9 +120,13 @@ class AuthController extends Controller
      *
      * @return JsonResponse
      */
-    public function logout(): JsonResponse
+    public function logout(Request $request): JsonResponse
     {
         try {
+            if ($request->hasCookie(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"))) {
+                $expiredCookie = cookie()->forget(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"));
+            }
+            Cookie::queue($expiredCookie);
             auth()->logout();
             return response()->json([
                 "status" => true,
