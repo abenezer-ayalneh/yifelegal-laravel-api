@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\RequestController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,10 +19,12 @@ use Illuminate\Support\Facades\Route;
 // Free routes
 Route::post("login", [AuthController::class, "login"])->name("login");
 Route::post("signUp", [AuthController::class, "signUp"])->name("signUp");
+
 // Protected routes
 Route::middleware(["api","jwt"])->group(function () {
     Route::apiResources([
         "user" => UserController::class,
+        "request" => RequestController::class,
     ]);
 
     Route::post("me",[AuthController::class,"me"])->name("Auth.me");
