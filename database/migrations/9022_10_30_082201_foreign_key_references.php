@@ -107,17 +107,14 @@ return new class extends Migration {
         // Users
         if (Schema::hasTable("users")) {
             Schema::table("users", function (Blueprint $table) {
-                if (Schema::hasColumn("users", "role_id")) {
-                    $table->dropConstrainedForeignId("role_id");
-                }
                 if (Schema::hasColumn("users", "created_by")) {
-                    $table->dropForeign("created_by");
+                    $table->dropForeign("users_created_by_foreign");
                 }
                 if (Schema::hasColumn("users", "updated_by")) {
-                    $table->dropForeign("updated_by");
+                    $table->dropForeign("users_updated_by_foreign");
                 }
                 if (Schema::hasColumn("users", "deleted_by")) {
-                    $table->dropForeign("deleted_by");
+                    $table->dropForeign("users_deleted_by_foreign");
                 }
             });
         }
@@ -126,13 +123,13 @@ return new class extends Migration {
         if (Schema::hasTable("entities")) {
             Schema::table("entities", function (Blueprint $table) {
                 if (Schema::hasColumn("entities", "created_by")) {
-                    $table->dropForeign("created_by");
+                    $table->dropForeign("entities_created_by_foreign");
                 }
                 if (Schema::hasColumn("entities", "updated_by")) {
-                    $table->dropForeign("updated_by");
+                    $table->dropForeign("entities_updated_by_foreign");
                 }
                 if (Schema::hasColumn("entities", "deleted_by")) {
-                    $table->dropForeign("deleted_by");
+                    $table->dropForeign("entities_deleted_by_foreign");
                 }
             });
         }
@@ -141,13 +138,13 @@ return new class extends Migration {
         if (Schema::hasTable("entity_types")) {
             Schema::table("entity_types", function (Blueprint $table) {
                 if (Schema::hasColumn("entity_types", "created_by")) {
-                    $table->dropForeign("created_by");
+                    $table->dropForeign("entity_types_created_by_foreign");
                 }
                 if (Schema::hasColumn("entity_types", "updated_by")) {
-                    $table->dropForeign("updated_by");
+                    $table->dropForeign("entity_types_updated_by_foreign");
                 }
                 if (Schema::hasColumn("entity_types", "deleted_by")) {
-                    $table->dropForeign("deleted_by");
+                    $table->dropForeign("entity_types_deleted_by_foreign");
                 }
             });
         }
@@ -156,13 +153,13 @@ return new class extends Migration {
         if (Schema::hasTable("attributes")) {
             Schema::table("attributes", function (Blueprint $table) {
                 if (Schema::hasColumn("attributes", "created_by")) {
-                    $table->dropForeign("created_by");
+                    $table->dropForeign("attributes_created_by_foreign");
                 }
                 if (Schema::hasColumn("attributes", "updated_by")) {
-                    $table->dropForeign("updated_by");
+                    $table->dropForeign("attributes_updated_by_foreign");
                 }
                 if (Schema::hasColumn("attributes", "deleted_by")) {
-                    $table->dropForeign("deleted_by");
+                    $table->dropForeign("attributes_deleted_by_foreign");
                 }
             });
         }

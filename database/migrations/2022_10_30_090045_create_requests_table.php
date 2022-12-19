@@ -15,16 +15,14 @@ return new class extends Migration
     {
         Schema::create('requests', function (Blueprint $table) {
             $table->id();
-            $table->foreignId("entity_id");
-            $table->foreignId("entity_type_id")->nullable();
-            $table->foreignId("attribute_id");
-            $table->longText("value");
+            $table->boolean("is_request_for_others")->default(false);
+            $table->string("requested_for")->nullable();
+            $table->string("requested_for_phone_number")->nullable();
             $table->foreignId("created_by");
             $table->foreignId("updated_by");
-            $table->timestamps();
             $table->foreignId("deleted_by")->nullable();
             $table->softDeletes();
-            $table->unique(["entity_id","entity_type_id","attribute_id"],"unique_entity_entity_type_and_attribute");
+            $table->timestamps();
         });
     }
 

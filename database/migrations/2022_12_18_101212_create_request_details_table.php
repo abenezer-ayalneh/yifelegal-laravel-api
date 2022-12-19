@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      *
@@ -12,15 +13,18 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('entity_types', function (Blueprint $table) {
+        Schema::create('request_details', function (Blueprint $table) {
             $table->id();
-            $table->string("name")->unique();
-            $table->text("description");
+            $table->foreignId("request_id");
+            $table->string("attribute");
+            $table->text("value");
             $table->foreignId("created_by");
             $table->foreignId("updated_by");
             $table->timestamps();
             $table->foreignId("deleted_by")->nullable();
             $table->softDeletes();
+            $table->unique(["request_id","attribute"],"unique_request_id_and_attribute");
+
         });
     }
 
@@ -31,6 +35,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('entity_types');
+        Schema::dropIfExists('request_details');
     }
 };

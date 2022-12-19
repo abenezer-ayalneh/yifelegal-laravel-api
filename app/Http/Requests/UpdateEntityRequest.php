@@ -3,18 +3,17 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class StoreRequestRequest extends FormRequest
+class UpdateEntityRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      *
      * @return bool
      */
-    public function authorize(): bool
+    public function authorize()
     {
-        return true;
+        return false;
     }
 
     /**
@@ -22,12 +21,10 @@ class StoreRequestRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules(): array
+    public function rules()
     {
         return [
-            "entity" => "required|string",
-            "entityType" => "required|string",
-            "dealType" => ["required",Rule::in(["sale","rent"])],
+            //
         ];
     }
 }

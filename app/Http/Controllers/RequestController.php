@@ -5,7 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreRequestRequest;
 use App\Http\Requests\UpdateRequestRequest;
 use App\Models\Request;
+use App\Models\RequestDetail;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class RequestController extends Controller
@@ -21,6 +25,49 @@ class RequestController extends Controller
     }
 
     /**
+     * Store a newly created resource in storage.
+     *
+     * @param StoreRequestRequest $storeRequest
+     * @return JsonResponse
+     */
+    public function store(StoreRequestRequest $storeRequest): JsonResponse
+    {
+        try {
+            DB::transaction(function () use ($storeRequest) {
+                $request = Request::query()->create([
+                    "created_by" => auth()->id(),
+                    "updated_by" => auth()->id(),
+                ]);
+
+                foreach ($storeRequest->all() as $attribute => $value) {
+                    RequestDetail::query()->create([
+                        "request_id" => $request->getAttribute("id"),
+                        "attribute" => $attribute,
+                        "value" => $value,
+                        "created_by" => auth()->id(),
+                        "updated_by" => auth()->id(),
+                    ]);
+                }
+            });
+
+            return response()->json([
+                "status" => true,
+                "message" => "Request submitted successfully",
+                "data" => [],
+                "error" => [],
+            ]);
+        } catch (Exception $e) {
+            Log::error($e);
+            return response()->json([
+                "status" => false,
+                "message" => "Error storing your request",
+                "data" => [],
+                "error" => $e->getCode(),
+            ]);
+        }
+    }
+
+    /**
      * Show the form for creating a new resource.
      *
      * @return Response
@@ -28,17 +75,6 @@ class RequestController extends Controller
     public function create()
     {
         //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param StoreRequestRequest $request
-     * @return Response
-     */
-    public function store(StoreRequestRequest $request)
-    {
-        Log::debug($request);
     }
 
     /**

@@ -11,15 +11,13 @@ return new class extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('phone_number')->unique();
             $table->string('email')->unique()->nullable();
-            $table->foreignId("role_id");
-            $table->rememberToken();
             $table->foreignId("created_by");
             $table->foreignId("updated_by");
             $table->timestamps();
@@ -33,7 +31,7 @@ return new class extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('users');
     }
