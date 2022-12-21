@@ -59,7 +59,6 @@ class AuthController extends Controller
     public function signUp(StoreUserRequest $request): Builder|Model|JsonResponse
     {
         $request->merge([
-            "role_id" => 2,
             "created_by" => 1,
             "updated_by" => 1,
         ]);
