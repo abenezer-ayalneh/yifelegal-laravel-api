@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Exceptions\UserNotDefinedException;
 
 class AuthController extends Controller
@@ -22,6 +23,10 @@ class AuthController extends Controller
     public function login(LoginRequest $request): JsonResponse
     {
         try {
+            if(!self::validatePhoneNumber($request->phoneNumber)){
+                throw ValidationException::withMessages(["Please enter a valid phone number"]);
+            }
+
             if ($user = User::query()->firstWhere("phone_number", "=", $request->phoneNumber)) {
                 $token = auth()->login($user);
                 Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_TTL", "1440"));
@@ -49,6 +54,19 @@ class AuthController extends Controller
                 "data" => [],
                 "error" => $e->getCode(),
             ]);
+        }
+    }
+
+    /**
+     * Validation for phone number
+     */
+    public function validatePhoneNumber($phoneNumber): bool
+    {
+        $pattern = '/^\+(?:[0-9] ?){6,14}[0-9]$/';
+        if (preg_match($pattern, $phoneNumber)) {
+            return true;
+        } else {
+            return false;
         }
     }
 

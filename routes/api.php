@@ -21,13 +21,20 @@ Route::post("login", [AuthController::class, "login"])->name("login");
 Route::post("signUp", [AuthController::class, "signUp"])->name("signUp");
 
 // Protected routes
-Route::middleware(["api","jwt"])->group(function () {
+Route::middleware(["api", "jwt"])->group(function () {
     Route::apiResources([
         "user" => UserController::class,
-        "request" => RequestController::class,
     ]);
 
-    Route::post("me",[AuthController::class,"me"])->name("Auth.me");
-    Route::post("checkToken",[AuthController::class,"checkToken"])->name("Auth.checkToken");
-    Route::post("logout",[AuthController::class,"logout"])->name("Auth.logout");
+    // Request
+    Route::prefix("request")->group(function () {
+        Route::get("mine", [RequestController::class, "myRequests"])->name("Request.myRequests");
+        Route::get("mine/entity", [RequestController::class, "myRequestWithEntity"])->name("Request.myRequestWithEntity");
+
+        Route::post("store", [RequestController::class, "store"])->name("Request.store");
+    });
+
+    Route::post("me", [AuthController::class, "me"])->name("Auth.me");
+    Route::post("check/token", [AuthController::class, "checkToken"])->name("Auth.checkToken");
+    Route::post("logout", [AuthController::class, "logout"])->name("Auth.logout");
 });

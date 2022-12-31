@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RequestDetail extends Model
 {
@@ -20,4 +21,12 @@ class RequestDetail extends Model
         "deleted_by",
         "deleted_at",
     ];
+
+    /*
+     * The parent request
+     */
+    public function request(): BelongsTo
+    {
+        return $this->belongsTo(Request::class);
+    }
 }

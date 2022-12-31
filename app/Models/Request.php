@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Request extends Model
 {
@@ -20,4 +21,12 @@ class Request extends Model
         "created_at",
         "updated_at",
     ];
+
+    /*
+     * Relationship with request_detail table
+     */
+    public function detail(): HasMany
+    {
+        return $this->hasMany(RequestDetail::class, "request_id");
+    }
 }

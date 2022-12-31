@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateRequestRequest;
 use App\Models\Request;
 use App\Models\RequestDetail;
 use Exception;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -68,24 +69,75 @@ class RequestController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Fetch my requests with their detail
      *
-     * @return Response
+     * @return JsonResponse
      */
-    public function create()
+    public function myRequests(): JsonResponse
     {
-        //
+        try {
+            $myRequests = RequestDetail::query()
+                ->where("created_by", "=", auth()->id())
+                ->selectRaw("
+                    SUM(if(attribute = 'entity' and value = 'house',1,0)) as houseCount,
+                    SUM(if(attribute = 'entity' and value = 'land',1,0)) as landCount,
+                    SUM(if(attribute = 'entity' and value = 'commercialBuilding',1,0)) as commercialBuildingCount,
+                    SUM(if(attribute = 'entity' and value = 'guestHouse',1,0)) as guestHouseCount,
+                    SUM(if(attribute = 'entity' and value = 'machineryAndTrucks',1,0)) as machineryAndTruckCount,
+                    SUM(if(attribute = 'entity' and value = 'car',1,0)) as carCount,
+                    SUM(if(attribute = 'entity' and value = 'wholeBuilding',1,0)) as wholeBuildingCount,
+                    SUM(if(attribute = 'entity' and value = 'threeWheeler',1,0)) as threeWheelerCount
+                ")->get();
+        } catch (Exception $e) {
+            Log::error($e);
+            return response()->json([
+                "status" => false,
+                "message" => "Error fetching your requests",
+                "data" => [],
+                "error" => $e->getCode(),
+            ]);
+        }
+
+        return response()->json([
+            "status" => true,
+            "message" => "Successfully fetched your requests",
+            "data" => compact("myRequests"),
+            "error" => [],
+        ]);
     }
 
     /**
-     * Display the specified resource.
+     * Fetch my requests with the specified entity
      *
-     * @param Request $request
-     * @return Response
+     * @param \Illuminate\Http\Request $request
+     * @return JsonResponse
      */
-    public function show(Request $request)
+    public function myRequestWithEntity(\Illuminate\Http\Request $request): JsonResponse
     {
-        //
+        Log::debug($request);
+        try {
+            $myRequests = Request::query()
+                ->where("created_by", "=", auth()->id())
+                ->whereHas("detail", function (Builder $detail) use ($request) {
+                    $detail->where("attribute", "=", "entity")->where("value", "=", $request->entity);
+                })->with("detail")
+                ->get();
+        } catch (Exception $e) {
+            Log::error($e);
+            return response()->json([
+                "status" => false,
+                "message" => "Error fetching your $request->entity requests",
+                "data" => [],
+                "error" => $e->getCode(),
+            ]);
+        }
+
+        return response()->json([
+            "status" => true,
+            "message" => "Successfully fetched your $request->entity requests",
+            "data" => compact("myRequests"),
+            "error" => [],
+        ]);
     }
 
     /**
