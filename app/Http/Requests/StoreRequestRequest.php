@@ -26,8 +26,7 @@ class StoreRequestRequest extends FormRequest
     {
         return [
             "entity" => "required|string",
-            "entityType" => "required|string",
-            "dealType" => ["required",Rule::in(["sale","rent"])],
+            "deal" => ["required",Rule::in(["sale","rent"])],
         ];
     }
 }

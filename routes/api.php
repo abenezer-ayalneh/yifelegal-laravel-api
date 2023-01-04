@@ -28,6 +28,7 @@ Route::middleware(["api", "jwt"])->group(function () {
 
     // Request
     Route::prefix("request")->group(function () {
+        Route::get("/", [RequestController::class, "index"])->name("Request.index");
         Route::get("mine", [RequestController::class, "myRequests"])->name("Request.myRequests");
         Route::get("mine/entity", [RequestController::class, "myRequestWithEntity"])->name("Request.myRequestWithEntity");
 

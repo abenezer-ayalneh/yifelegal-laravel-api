@@ -12,17 +12,35 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Psy\Util\Json;
 
 class RequestController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return Response
+     * @return JsonResponse
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        //
+        try {
+            $requests = Request::query()->with("detail")->orderByDesc("created_at")->get();
+
+            return response()->json([
+                "status" => true,
+                "message" => "Successfully fetched requests",
+                "data" => compact("requests"),
+                "error" => [],
+            ]);
+        }catch (Exception $e){
+            Log::error($e);
+            return response()->json([
+                "status" => false,
+                "message" => "Error fetching requests",
+                "data" => [],
+                "error" => $e->getCode(),
+            ]);
+        }
     }
 
     /**
@@ -33,6 +51,7 @@ class RequestController extends Controller
      */
     public function store(StoreRequestRequest $storeRequest): JsonResponse
     {
+        Log::debug($storeRequest);
         try {
             DB::transaction(function () use ($storeRequest) {
                 $request = Request::query()->create([
@@ -44,7 +63,7 @@ class RequestController extends Controller
                     RequestDetail::query()->create([
                         "request_id" => $request->getAttribute("id"),
                         "attribute" => $attribute,
-                        "value" => $value,
+                        "value" => $value ?? "",
                         "created_by" => auth()->id(),
                         "updated_by" => auth()->id(),
                     ]);
@@ -81,12 +100,12 @@ class RequestController extends Controller
                 ->selectRaw("
                     SUM(if(attribute = 'entity' and value = 'house',1,0)) as houseCount,
                     SUM(if(attribute = 'entity' and value = 'land',1,0)) as landCount,
-                    SUM(if(attribute = 'entity' and value = 'commercialBuilding',1,0)) as commercialBuildingCount,
-                    SUM(if(attribute = 'entity' and value = 'guestHouse',1,0)) as guestHouseCount,
-                    SUM(if(attribute = 'entity' and value = 'machineryAndTrucks',1,0)) as machineryAndTruckCount,
+                    SUM(if(attribute = 'entity' and value = 'commercial building',1,0)) as commercialBuildingCount,
+                    SUM(if(attribute = 'entity' and value = 'guest house',1,0)) as guestHouseCount,
+                    SUM(if(attribute = 'entity' and value = 'machinery and trucks',1,0)) as machineryAndTruckCount,
                     SUM(if(attribute = 'entity' and value = 'car',1,0)) as carCount,
-                    SUM(if(attribute = 'entity' and value = 'wholeBuilding',1,0)) as wholeBuildingCount,
-                    SUM(if(attribute = 'entity' and value = 'threeWheeler',1,0)) as threeWheelerCount
+                    SUM(if(attribute = 'entity' and value = 'whole building',1,0)) as wholeBuildingCount,
+                    SUM(if(attribute = 'entity' and value = 'three wheeler',1,0)) as threeWheelerCount
                 ")->get();
         } catch (Exception $e) {
             Log::error($e);
