@@ -12,7 +12,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Psy\Util\Json;
 
 class RequestController extends Controller
 {
@@ -32,7 +31,7 @@ class RequestController extends Controller
                 "data" => compact("requests"),
                 "error" => [],
             ]);
-        }catch (Exception $e){
+        } catch (Exception $e) {
             Log::error($e);
             return response()->json([
                 "status" => false,
@@ -55,9 +54,13 @@ class RequestController extends Controller
         try {
             DB::transaction(function () use ($storeRequest) {
                 $request = Request::query()->create([
+                    "is_request_for_others" => is_null($storeRequest->requestedFor),
+                    "requested_for" => $storeRequest->requestedFor,
+                    "requested_for_phone_number" => $storeRequest->requestedForPhoneNumber,
                     "created_by" => auth()->id(),
                     "updated_by" => auth()->id(),
                 ]);
+                $storeRequest->except(["requestedForPhoneNumber","requestedFor"]);
 
                 foreach ($storeRequest->all() as $attribute => $value) {
                     RequestDetail::query()->create([

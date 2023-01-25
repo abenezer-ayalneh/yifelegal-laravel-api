@@ -3,9 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class StoreRequestRequest extends FormRequest
+class UserStatusUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -14,6 +13,7 @@ class StoreRequestRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        //TODO only for super admin user
         return true;
     }
 
@@ -25,10 +25,8 @@ class StoreRequestRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "entity" => "required|string",
-            "deal" => ["required",Rule::in(["sale","rent"])],
-            "requestedFor" => "nullable|string",
-            "requestedForPhoneNumber" => "nullable|string",
+            "userID" => "required|integer",
+            "status" => "required|boolean"
         ];
     }
 }

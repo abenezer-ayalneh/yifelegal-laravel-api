@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 /*
 |--------------------------------------------------------------------------
 | API Routes
-|--------------------------------------------------------------------------
+|--------------------------------------------------------------------------5
 |
 | Here is where you can register API routes for your application. These
 | routes are loaded by the RouteServiceProvider within a group which
@@ -22,9 +22,13 @@ Route::post("signUp", [AuthController::class, "signUp"])->name("signUp");
 
 // Protected routes
 Route::middleware(["api", "jwt"])->group(function () {
-    Route::apiResources([
-        "user" => UserController::class,
-    ]);
+    // User
+    Route::prefix("users")->group(function () {
+        Route::get("/", [UserController::class, "index"])->name("User.index");
+
+        Route::post("/store", [UserController::class, "store"])->name("User.store");
+        Route::post("/changeActiveStatus", [UserController::class, "changeActiveStatus"])->name("User.changeActiveStatus");
+    });
 
     // Request
     Route::prefix("request")->group(function () {
