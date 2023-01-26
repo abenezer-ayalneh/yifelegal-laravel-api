@@ -60,9 +60,8 @@ class RequestController extends Controller
                     "created_by" => auth()->id(),
                     "updated_by" => auth()->id(),
                 ]);
-                $storeRequest->except(["requestedForPhoneNumber","requestedFor"]);
 
-                foreach ($storeRequest->all() as $attribute => $value) {
+                foreach ($storeRequest->except(["requestedForPhoneNumber","requestedFor"]) as $attribute => $value) {
                     RequestDetail::query()->create([
                         "request_id" => $request->getAttribute("id"),
                         "attribute" => $attribute,
