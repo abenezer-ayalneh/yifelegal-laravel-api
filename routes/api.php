@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -39,7 +40,14 @@ Route::middleware(["api", "jwt"])->group(function () {
         Route::post("store", [RequestController::class, "store"])->name("Request.store");
     });
 
+    // Payment
+    Route::prefix("payment")->group(function () {
+        Route::post('pay', [PaymentController::class, "initialize"])->name('Payment.pay');
+        Route::get('callback/{reference}', [PaymentController::class, "callback"])->name('Payment.callback');
+    });
+
     Route::post("me", [AuthController::class, "me"])->name("Auth.me");
     Route::post("check/token", [AuthController::class, "checkToken"])->name("Auth.checkToken");
     Route::post("logout", [AuthController::class, "logout"])->name("Auth.logout");
+
 });
