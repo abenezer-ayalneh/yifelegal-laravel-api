@@ -42,7 +42,7 @@ Route::middleware(["api", "jwt"])->group(function () {
 
     // Payment
     Route::prefix("payment")->group(function () {
-        Route::post('pay', [PaymentController::class, "initialize"])->name('Payment.pay');
+    Route::post('pay', [PaymentController::class, "initialize"])->name('Payment.pay');
         Route::get('callback/{reference}', [PaymentController::class, "callback"])->name('Payment.callback');
     });
 

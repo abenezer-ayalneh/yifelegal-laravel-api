@@ -19,7 +19,7 @@ class PaymentController extends Controller
 
     }
 
-    public function initialize()
+    public function initialize(): \Illuminate\Http\JsonResponse
     {
         //This generates a payment reference
         $reference = $this->reference;
@@ -30,27 +30,36 @@ class PaymentController extends Controller
             'email' => 'abenezer@yifelegal.com',
             'tx_ref' => $reference,
             'currency' => "ETB",
-            'callback_url' => route('Payment.callback', [$reference]),
+            'callback_url' => 'https://example.com',
+//            'callback_url' => route('Payment.callback', [$reference]),
             'first_name' => "Abenezer",
             'last_name' => "Ayalneh",
-//            "customization" => [
-//                "title" => 'Chapa',
-//                "description" => "Testing payment with Chapa"
-//            ]
+            "customization" => [
+                "title" => 'YIFELEGAL',
+                "description" => "Testing payment with Chapa"
+            ]
         ];
 
         $payment = Chapa::initializePayment($data);
-        Log::debug($payment);
 
         if ($payment['status'] !== 'success') {
             // notify something went wrong
             Log::error("Payment failed to proceed");
-            return;
+            Log::error($payment);
+            return response()->json([
+                "status" => false,
+                "message" => "Error processing payment",
+                "data" => [],
+                "error" => 'Payment failed to proceed',
+            ]);
         }
 
-        Log::info("Payment Successful");
-
-        return $payment['data']['checkout_url'];
+        return response()->json([
+            "status" => true,
+            "message" => "Payment processed successfully",
+            "data" => ["checkoutUrl" => $payment['data']['checkout_url'],],
+            "error" => [],
+        ]);
     }
 
     /**
@@ -70,8 +79,6 @@ class PaymentController extends Controller
         } else {
             //oopsie something ain't right.
             Log::error("Verification failed");
-
-
         }
     }
 }
