@@ -29,7 +29,7 @@ class AuthController extends Controller
 
             if ($user = User::query()->firstWhere("phone_number", "=", $request->phoneNumber)) {
                 $token = auth()->login($user);
-                Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_TTL", "1440"));
+                Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_TTL", "1440"),'/',env('JWT_DOMAIN','localhost'));
                 $userExists = true;
 
                 return response()->json([
@@ -84,7 +84,7 @@ class AuthController extends Controller
         $user = User::query()->create($request->all());
         try {
             $token = auth()->login($user);
-            Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_TTL", "1440"));
+            Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_TTL", "1440"),'/',env('JWT_DOMAIN','localhost'));
             $userExists = false;
 
             return response()->json([
@@ -170,7 +170,7 @@ class AuthController extends Controller
     {
         try {
             $token = auth()->refresh();
-            Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_TTL", "1440"));
+            Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_TTL", "1440"),'/',env('JWT_DOMAIN','localhost'));
             return response()->json([
                 "status" => true,
                 'message' => 'Successfully refreshed token',
