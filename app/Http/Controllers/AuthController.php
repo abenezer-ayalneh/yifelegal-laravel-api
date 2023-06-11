@@ -18,18 +18,52 @@ use Tymon\JWTAuth\Exceptions\UserNotDefinedException;
 class AuthController extends Controller
 {
     /**
+     * Sign up a user using a phone number
+     * @throws Exception
+     */
+    public function signUp(StoreUserRequest $request): Builder|Model|JsonResponse
+    {
+        $request->merge([
+            "created_by" => 1,
+            "updated_by" => 1,
+        ]);
+
+        $user = User::query()->create($request->all());
+        try {
+            $token = auth()->login($user);
+            Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_ACCESS_TOKEN_TTL", "1440"), '/', env('JWT_DOMAIN', 'localhost'), false, true);
+            $userExists = false;
+
+            return response()->json([
+                "status" => true,
+                "message" => "Sign up successful",
+                "data" => compact(["user", "userExists"]),
+                "error" => [],
+            ]);
+        } catch (Exception $e) {
+            Log::error($e);
+            return response()->json([
+                "status" => false,
+                "message" => "Error creating user",
+                "data" => [],
+                "error" => $e->getCode(),
+            ]);
+        }
+    }
+
+    /**
      * Attempt to authenticate using the provided credential
      */
     public function login(LoginRequest $request): JsonResponse
     {
         try {
-            if(!self::validatePhoneNumber($request->phoneNumber)){
+            if (!self::validatePhoneNumber($request->phoneNumber)) {
                 throw ValidationException::withMessages(["Please enter a valid phone number"]);
             }
 
             if ($user = User::query()->firstWhere("phone_number", "=", $request->phoneNumber)) {
                 $token = auth()->login($user);
-                Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_TTL", "1440"),'/',env('JWT_DOMAIN','localhost'));
+                Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_ACCESS_TOKEN_TTL", "1440"), '/', env('JWT_DOMAIN', 'localhost'), false, true);
                 $userExists = true;
 
                 return response()->json([
@@ -67,40 +101,6 @@ class AuthController extends Controller
             return true;
         } else {
             return false;
-        }
-    }
-
-    /**
-     * Sign up a user using a phone number
-     * @throws Exception
-     */
-    public function signUp(StoreUserRequest $request): Builder|Model|JsonResponse
-    {
-        $request->merge([
-            "created_by" => 1,
-            "updated_by" => 1,
-        ]);
-
-        $user = User::query()->create($request->all());
-        try {
-            $token = auth()->login($user);
-            Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_TTL", "1440"),'/',env('JWT_DOMAIN','localhost'));
-            $userExists = false;
-
-            return response()->json([
-                "status" => true,
-                "message" => "Sign up successful",
-                "data" => compact(["user", "userExists"]),
-                "error" => [],
-            ]);
-        } catch (Exception $e) {
-            Log::error($e);
-            return response()->json([
-                "status" => false,
-                "message" => "Error creating user",
-                "data" => [],
-                "error" => $e->getCode(),
-            ]);
         }
     }
 
@@ -170,7 +170,7 @@ class AuthController extends Controller
     {
         try {
             $token = auth()->refresh();
-            Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_TTL", "1440"),'/',env('JWT_DOMAIN','localhost'));
+            Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_ACCESS_TOKEN_TTL", "1440"), '/', env('JWT_DOMAIN', 'localhost'), false, true);
             return response()->json([
                 "status" => true,
                 'message' => 'Successfully refreshed token',

@@ -34,7 +34,7 @@ class JWTAuthenticate
             Log::error($e);
             if ($e instanceof TokenExpiredException) {
                 $freshToken = auth()->refresh();
-                Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $freshToken, env("JWT_TTL", 1440));
+                Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $freshToken, env("JWT_ACCESS_TOKEN_TTL", 1440));
 
                 return $next($request);
             } else {
