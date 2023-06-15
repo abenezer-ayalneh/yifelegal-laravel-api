@@ -31,7 +31,7 @@ class AuthController extends Controller
         $user = User::query()->create($request->all());
         try {
             $token = auth()->login($user);
-            Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_ACCESS_TOKEN_TTL", "1440"), '/', 'yifelegal.vercel.app', false, true);
+            Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_ACCESS_TOKEN_TTL", "1440"), '/', '.yifelegal.vercel.app', false, true);
             $userExists = false;
 
             return response()->json([
@@ -63,7 +63,7 @@ class AuthController extends Controller
 
             if ($user = User::query()->firstWhere("phone_number", "=", $request->phoneNumber)) {
                 $token = auth()->login($user);
-                Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_ACCESS_TOKEN_TTL", "1440"), '/', 'yifelegal.vercel.app', false, true);
+                Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_ACCESS_TOKEN_TTL", "1440"), '/', '.yifelegal.vercel.app', false, true);
                 $userExists = true;
 
                 return response()->json([
@@ -170,7 +170,7 @@ class AuthController extends Controller
     {
         try {
             $token = auth()->refresh();
-            Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_ACCESS_TOKEN_TTL", "1440"), '/', 'yifelegal.vercel.app', false, true);
+            Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_ACCESS_TOKEN_TTL", "1440"), '/', '.yifelegal.vercel.app', false, true);
             return response()->json([
                 "status" => true,
                 'message' => 'Successfully refreshed token',
