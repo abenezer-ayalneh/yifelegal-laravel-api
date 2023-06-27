@@ -18,11 +18,16 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Free routes
-Route::post("login", [AuthController::class, "login"])->name("login");
-Route::post("signUp", [AuthController::class, "signUp"])->name("signUp");
 
 // Protected routes
-Route::middleware(["api", "jwt"])->group(function () {
+Route::middleware(["api"])->group(function () {
+    // Auth
+    Route::post("sign-up", [AuthController::class, "signUp"])->name("signUp");
+    Route::post("login", [AuthController::class, "login"])->name("login");
+    Route::post("me", [AuthController::class, "me"])->name("Auth.me");
+    Route::post("check/token", [AuthController::class, "checkToken"])->name("Auth.checkToken");
+    Route::post("logout", [AuthController::class, "logout"])->name("Auth.logout");
+
     // User
     Route::prefix("users")->group(function () {
         Route::get("/", [UserController::class, "index"])->name("User.index");
@@ -42,12 +47,7 @@ Route::middleware(["api", "jwt"])->group(function () {
 
     // Payment
     Route::prefix("payment")->group(function () {
-    Route::post('pay', [PaymentController::class, "initialize"])->name('Payment.pay');
+        Route::post('pay', [PaymentController::class, "initialize"])->name('Payment.pay');
         Route::get('callback/{reference}', [PaymentController::class, "callback"])->name('Payment.callback');
     });
-
-    Route::post("me", [AuthController::class, "me"])->name("Auth.me");
-    Route::post("check/token", [AuthController::class, "checkToken"])->name("Auth.checkToken");
-    Route::post("logout", [AuthController::class, "logout"])->name("Auth.logout");
-
 });

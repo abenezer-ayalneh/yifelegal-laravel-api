@@ -30,14 +30,13 @@ class AuthController extends Controller
 
         $user = User::query()->create($request->all());
         try {
-            $token = auth()->login($user);
-            Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_ACCESS_TOKEN_TTL", "1440"), '/', '.yifelegal.vercel.app', false, true);
+            $accessToken = auth()->login($user);
             $userExists = false;
 
             return response()->json([
                 "status" => true,
                 "message" => "Sign up successful",
-                "data" => compact(["user", "userExists"]),
+                "data" => compact(["user", "userExists", "accessToken"]),
                 "error" => [],
             ]);
         } catch (Exception $e) {
@@ -62,14 +61,13 @@ class AuthController extends Controller
             }
 
             if ($user = User::query()->firstWhere("phone_number", "=", $request->phoneNumber)) {
-                $token = auth()->login($user);
-                Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_ACCESS_TOKEN_TTL", "1440"), '/', '.yifelegal.vercel.app', false, true);
+                $accessToken = auth()->login($user);
                 $userExists = true;
 
                 return response()->json([
                     "status" => true,
                     "message" => "Login successful",
-                    "data" => compact(["user", "userExists"]),
+                    "data" => compact(["user", "userExists","accessToken"]),
                     "error" => [],
                 ]);
             } else {
@@ -135,15 +133,12 @@ class AuthController extends Controller
     /**
      * Log the user out (Invalidate the token).
      *
+     * @param Request $request
      * @return JsonResponse
      */
     public function logout(Request $request): JsonResponse
     {
         try {
-            if ($request->hasCookie(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"))) {
-                $expiredCookie = cookie()->forget(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"));
-            }
-            Cookie::queue($expiredCookie);
             auth()->logout();
             return response()->json([
                 "status" => true,
@@ -170,7 +165,6 @@ class AuthController extends Controller
     {
         try {
             $token = auth()->refresh();
-            Cookie::queue(env("JWT_TOKEN_NAME", "API_ACCESS_TOKEN"), $token, env("JWT_ACCESS_TOKEN_TTL", "1440"), '/', '.yifelegal.vercel.app', false, true);
             return response()->json([
                 "status" => true,
                 'message' => 'Successfully refreshed token',
