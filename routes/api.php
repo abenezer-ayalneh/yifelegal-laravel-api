@@ -20,10 +20,11 @@ use Illuminate\Support\Facades\Route;
 // Free routes
 
 // Protected routes
+Route::post("refresh", [AuthController::class, "refresh"])->name("Auth.refresh");
 Route::middleware(["api"])->group(function () {
     // Auth
-    Route::post("sign-up", [AuthController::class, "signUp"])->name("signUp");
-    Route::post("login", [AuthController::class, "login"])->name("login");
+    Route::post("sign-up", [AuthController::class, "signUp"])->name("Auth.signUp");
+    Route::post("login", [AuthController::class, "login"])->name("Auth.login");
     Route::post("me", [AuthController::class, "me"])->name("Auth.me");
     Route::post("check/token", [AuthController::class, "checkToken"])->name("Auth.checkToken");
     Route::post("logout", [AuthController::class, "logout"])->name("Auth.logout");

@@ -69,9 +69,6 @@ class PaymentController extends Controller
     public function callback($reference)
     {
         $data = Chapa::verifyTransaction($reference);
-//        dd($data);
-        Log::debug("Chapa verifyTransaction Data");
-        Log::debug($data);
 
         //if payment is successful
         if ($data['status'] == 'success') {

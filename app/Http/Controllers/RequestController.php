@@ -50,7 +50,6 @@ class RequestController extends Controller
      */
     public function store(StoreRequestRequest $storeRequest): JsonResponse
     {
-        Log::debug($storeRequest);
         try {
             DB::transaction(function () use ($storeRequest) {
                 $request = Request::query()->create([
@@ -135,7 +134,6 @@ class RequestController extends Controller
      */
     public function myRequestWithEntity(\Illuminate\Http\Request $request): JsonResponse
     {
-        Log::debug($request);
         try {
             $myRequests = Request::query()
                 ->where("created_by", "=", auth()->id())

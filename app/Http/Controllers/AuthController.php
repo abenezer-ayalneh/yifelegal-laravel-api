@@ -40,7 +40,6 @@ class AuthController extends Controller
                 "error" => [],
             ]);
         } catch (Exception $e) {
-            Log::error($e);
             return response()->json([
                 "status" => false,
                 "message" => "Error creating user",
@@ -161,14 +160,14 @@ class AuthController extends Controller
      * Refresh a token.
      * @return JsonResponse
      */
-    public function refresh()
+    public function refresh(): JsonResponse
     {
         try {
-            $token = auth()->refresh();
+            $accessToken = auth()->refresh();
             return response()->json([
                 "status" => true,
                 'message' => 'Successfully refreshed token',
-                "data" => [],
+                "data" => compact(["accessToken",]),
                 "error" => [],
             ]);
         } catch (Exception $e) {
